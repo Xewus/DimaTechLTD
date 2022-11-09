@@ -1,7 +1,8 @@
+from pydantic import BaseModel as PydanticModel
 from sanic import json
 from sanic.response import HTTPResponse
-from pydantic import BaseModel as PydanticModel
-from tortoise.queryset import QuerySetSingle, QuerySet
+from tortoise.queryset import QuerySet, QuerySetSingle
+
 
 async def json_response(
     schema: PydanticModel,

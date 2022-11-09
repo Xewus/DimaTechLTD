@@ -1,7 +1,8 @@
 """Эндпоинты для счетов.
 """
 from sanic import Blueprint
-from src.generics.views import ApiGetMixin, ApiPosMixin
+
+from src.core.views import ApiGetMixin, ApiPosMixin
 from src.db.models import Bill
 
 blue = Blueprint('bills', url_prefix='/bills')

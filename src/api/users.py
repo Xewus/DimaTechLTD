@@ -1,23 +1,19 @@
 """Эндпоинты для пользователей.
 """
 from sanic import Blueprint, Request, json
-from tortoise.contrib.pydantic import (pydantic_model_creator,
-                                       pydantic_queryset_creator)
-from tortoise.exceptions import IntegrityError
 from sanic_ext import validate
-from src.core.utils import json_response
+from tortoise.exceptions import IntegrityError
 
+from src.core.utils import json_response
 from src.db.models import User
-from src.schemas.users import UserCreateSchema, UserResponseSchema, UserUpdateSchema
+from src.schemas.users import (UserCreateSchema, UserResponseSchema,
+                               UserUpdateSchema)
 
 blue = Blueprint('users', url_prefix='/users')
 
-UserPyd = pydantic_model_creator(User)
-UserPydList = pydantic_queryset_creator(User)
-
 
 @blue.get('/')
-async def all_users(request: Request):
+async def get_all_users(request: Request):
     users = await User.all()
     return await json_response(UserResponseSchema, users, many=True)
 
@@ -49,8 +45,8 @@ async def update_user(request: Request, username: str, update_data: UserUpdateSc
     user: User = await User.get_or_none(username=username)
     if user is None:
         return json({'detail': 'username'}, status=422)
-    user.update_from_dict(update_data.dict())
-    user.save()
+    user.update_from_dict(update_data.dict(exclude_none=True))
+    await user.save()
     return await json_response(UserResponseSchema, user)
 
 

@@ -1,5 +1,3 @@
-from typing import Iterable
-
 from sanic import Request, json
 from sanic.response import HTTPResponse
 from sanic.views import HTTPMethodView
@@ -33,12 +31,12 @@ class BaseView(HTTPMethodView):
 
 class ApiGetMixin(BaseView):
     async def get(self, request: Request, pk: int | None = None) -> HTTPResponse:
-        # if pk is not None:
-        #     obj = await self.model.get_or_none(pk=pk)
-        #     if obj is None:
-        #         return json({'detail': request.json}, status=422)
-        #     obj = await self.pydantic_model.from_tortoise_orm(obj)
-        #     return json(obj.dict())
+        if pk is not None:
+            obj = await self.model.get_or_none(pk=pk)
+            if obj is None:
+                return json({'detail': request.json}, status=422)
+            obj = await self.pydantic_model.from_tortoise_orm(obj)
+            return json(obj.dict())
         
         objs = await self.pydantic_list.from_queryset(self.model.all())
         return json(objs.dict()['__root__'])

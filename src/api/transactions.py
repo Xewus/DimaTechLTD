@@ -7,8 +7,8 @@ from tortoise.contrib.pydantic import (pydantic_model_creator,
                                        pydantic_queryset_creator)
 from tortoise.exceptions import IntegrityError
 
+from src.core.views import ApiGetMixin, ApiPosMixin
 from src.db.models import Bill, Transaction
-from src.generics.views import ApiGetMixin, ApiPosMixin
 
 blue = Blueprint('transactions', url_prefix='transactions')
 

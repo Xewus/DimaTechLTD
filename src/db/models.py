@@ -114,7 +114,7 @@ class Good(Model):
     amount = fields.IntField(
         default=0,
         validators=[PositiveNumberlValidator],
-        description='Количество товара'   
+        description='Количество товара'
     )
 
 

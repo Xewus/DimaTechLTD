@@ -1,14 +1,15 @@
+import logging
+import sys
+
 from sanic import Sanic
 from tortoise.contrib.sanic import register_tortoise
 
+from src.api.bills import blue as blue_bills
 from src.api.goods import blue as blue_goods
 from src.api.transactions import blue as blue_transactions
 from src.api.users import blue as blue_users
-from src.api.bills import blue as blue_bills
 from src.db.models import create_first_user
 from src.settings import APP_NAME, DEBUG, TORTOISE_CONFIG, AppConfig
-import logging
-import sys
 
 fmt = logging.Formatter(
     fmt="%(asctime)s - %(message)s",
