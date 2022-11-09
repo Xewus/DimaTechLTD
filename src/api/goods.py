@@ -34,6 +34,15 @@ async def get_all_goods(request: Request):
     return await json_response(GoodResponseSchema, goods, many=True)
 
 
+@blue.get('/<good_id:int>')
+async def get_goog(request: Request, good_id: int):
+    good: Good = await Good.get_or_none(pk=good_id)
+    if good is None:
+        return json({'detail': 'good'}, status=422)
+    return await json_response(GoodResponseSchema, good)
+
+
+
 @blue.post('/')
 @validate(json=GoodCreateSchema, body_argument='new_good')
 async def create_good(request: Request, new_good: GoodCreateSchema):
@@ -45,20 +54,20 @@ async def create_good(request: Request, new_good: GoodCreateSchema):
     return await json_response(GoodResponseSchema, good)
 
 
-@blue.patch('/<pk:int>')
+@blue.patch('/<good_id:int>')
 @validate(json=GoodUpdateSchema, body_argument='update_data')
-async def update_user(request: Request, pk: int, update_data: GoodUpdateSchema):
-    good: Good = await Good.get_or_none(pk=pk)
+async def update_user(request: Request, good_id: int, update_data: GoodUpdateSchema):
+    good: Good = await Good.get_or_none(pk=good_id)
     if good is None:
-        return json({'detail': 'error'}, status=422)
+        return json({'detail': 'good'}, status=422)
     good.update_from_dict(update_data.dict(exclude_none=True))
     await good.save()
     return await json_response(GoodResponseSchema, good)
 
 
-@blue.delete('/<pk:int>')
-async def delete_good(request: Request, pk: int):
-    good: Good = await Good.get_or_none(pk=pk)
+@blue.delete('/<good_id:int>')
+async def delete_good(request: Request, good_id: int):
+    good: Good = await Good.get_or_none(pk=good_id)
     if good is None:
         return json({'detail': 'error'}, status=422)
     await good.delete()

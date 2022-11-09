@@ -1,7 +1,6 @@
 from decimal import Decimal
 
-from pydantic import (BaseModel, Field, NonNegativeInt, PositiveFloat,
-                      PositiveInt)
+from pydantic import (BaseModel, Field, NonNegativeInt, PositiveInt)
 
 
 class GoodCreateSchema(BaseModel):

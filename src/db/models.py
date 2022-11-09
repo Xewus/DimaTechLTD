@@ -126,7 +126,7 @@ class Bill(Model):
         decimal_places=2,
         description='Баланс пользователя'
     )
-    user = fields.ForeignKeyField(
+    user_id = fields.ForeignKeyField(
         model_name='models.User',
         related_name='bills',
         on_delete=fields.RESTRICT,

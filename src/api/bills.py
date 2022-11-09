@@ -1,21 +1,14 @@
 """Эндпоинты для счетов.
 """
-from sanic import Blueprint
-
-from src.core.views import ApiGetMixin, ApiPosMixin
+from sanic import Blueprint, Request
 from src.db.models import Bill
+from src.schemas.bills import BillCreateSchema, BillResponceSchema
+from src.core.utils import json_response
 
 blue = Blueprint('bills', url_prefix='/bills')
 
 
-class BillView(ApiGetMixin, ApiPosMixin):
-    model = Bill
-    one = True
-    many = True
-
-
-blue.add_route(
-    handler=BillView.as_view(),
-    uri='/',
-    methods=['GET', 'POST']
-)
+@blue.get('/')
+async def get_all_bills(request: Request):
+    bills = await Bill.all()
+    return await json_response(BillResponceSchema, bills, many=True)

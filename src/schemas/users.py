@@ -12,6 +12,7 @@ class UserCreateSchema(BaseModel):
 
 
 class UserUpdateSchema(BaseModel):
+    username: str
     password: str | None
     active: bool | None
     admin: bool | None

@@ -18,6 +18,14 @@ async def get_all_users(request: Request):
     return await json_response(UserResponseSchema, users, many=True)
 
 
+@blue.get('/<user_id:int>')
+async def get_user(request: Request, user_id: int):
+    user: User = await User.get_or_none(pk=user_id)
+    if user is None:
+        return json({'detail': 'username'}, status=422)
+    return await json_response(UserResponseSchema, user)
+
+
 @blue.post('/')
 @validate(json=UserCreateSchema, body_argument='new_user')
 async def create_user(request: Request, new_user: UserCreateSchema):
@@ -29,9 +37,9 @@ async def create_user(request: Request, new_user: UserCreateSchema):
     return await json_response(UserResponseSchema, user)
 
 
-@blue.patch('/active/<username:str>')
-async def activ(request: Request, username: str):
-    user = await User.get_or_none(username=username)
+@blue.patch('/active/<user_id:int>')
+async def activ(request: Request, user_id: int):
+    user = await User.get_or_none(pk=user_id)
     if user is None:
         return json({'detail': 'username'}, status=422)
     user.active = not user.active
@@ -39,12 +47,13 @@ async def activ(request: Request, username: str):
     return await json_response(UserResponseSchema, user)
 
 
-@blue.patch('/<username:str>')
+@blue.patch('/<user_id:int>')
 @validate(json=UserUpdateSchema, body_argument='update_data')
-async def update_user(request: Request, username: str, update_data: UserUpdateSchema):
-    user: User = await User.get_or_none(username=username)
+async def update_user(request: Request, user_id: int, update_data: UserUpdateSchema):
+    user: User = await User.get_or_none(pk=user_id)
     if user is None:
         return json({'detail': 'username'}, status=422)
+    print(update_data.dict())
     user.update_from_dict(update_data.dict(exclude_none=True))
     await user.save()
     return await json_response(UserResponseSchema, user)
