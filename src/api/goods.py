@@ -1,68 +1,53 @@
 """Эндпоинты для товаров.
 """
-from sanic import Blueprint, Request
-from sanic.response import json, HTTPResponse
+from sanic import Blueprint, Request, json
+from sanic.response import HTTPResponse
 from sanic.views import HTTPMethodView
+from tortoise.contrib.pydantic import (pydantic_model_creator,
+                                       pydantic_queryset_creator)
+from src.db.models import Good
+from src.generics.views import ApiGetMixin, ApiPosMixin, ApiPatchMixin, ApiDeleteMixin
 
 blue = Blueprint('goods', url_prefix='/goods')
+
+GoodPyd = pydantic_model_creator(Good)
+GoodPydList = pydantic_queryset_creator(Good)
 
 
 class GoodsBuyView(HTTPMethodView):
     """Покупка указанного товара.
-
-    #### Methods:
-    - GET:
-        Купить товар с указанным `good_id`.
     """
-    async def get(self, request: Request, good_id: int) -> HTTPResponse:
-        return json({good_id: 'buied'})
+    async def patch(self, request: Request, pk: int, amount: int = 1) -> HTTPResponse:
+        good = await Good.get_or_none(pk=pk)
+        amount = dict(request.json).get('amount', 1)
+        if good is None or amount < 1 or good.amount < amount:
+            return json({'detail': request.json}, status=422)
+        good.amount -= amount
+        await good.save()
+        good = await GoodPyd.from_tortoise_orm(good)
+        return json(good.dict())
 
 
-class GoodsListView(HTTPMethodView):
-    """Просмотр товаров и редактирование товара.
-
-    #### Methods:
-    - GET:
-        Если переда `good_id`, показать указанный товар.
-        Иначе показать весь список товаров.
-    - POST:
-        Добавить новый товар.
-    - PATCH:
-        Изменить указанный товар.
-    - DELETE:
-        Удалить указанный товар.
-    """
-    async def get(self, request: Request, good_id: int | None = None) -> HTTPResponse:
-        if good_id is not None:
-            return json({'good': good_id})
-        return json(['good1', 'good2'])
-    
-    async def post(self, request: Request) -> HTTPResponse:
-        return json({'good': request.args})
-    
-    async def patch(self, request: Request, good_id: int) -> HTTPResponse:
-        return json({good_id: request.args})
-    
-    async def delete(self, request: Request, good_id: int) -> HTTPResponse:
-        return json({good_id: request.args})
+class GoodsView(ApiGetMixin, ApiPosMixin, ApiPatchMixin, ApiDeleteMixin):
+    model = Good
+    one = True
+    many = True
 
 
 blue.add_route(
     handler=GoodsBuyView.as_view(),
-    uri='/buy/<good_id:int>',
-    methods=['GET']
+    uri='/buy/<pk:int>',
+    methods=['PATCH']
 )
 
-# Warning: [DEPRECATION v23.3]
-# Duplicate route names detected: SanicApp.goods.GoodsListView.
-# In the future, Sanic will enforce uniqueness in route naming.
+
 blue.add_route(
-    handler=GoodsListView.as_view(),
+    handler=GoodsView.as_view(),
     uri='/',
     methods=['GET']
 )
 blue.add_route(
-    handler=GoodsListView.as_view(),
-    uri='/<good_id:int>',
+    handler=GoodsView.as_view(),
+    uri='/<pk:int>',
     methods=['GET', 'PATCH', 'POST', 'DELETE']
 )

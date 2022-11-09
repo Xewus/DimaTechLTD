@@ -3,8 +3,17 @@
 from sanic import Blueprint, Request
 from sanic.response import HTTPResponse, json
 from sanic.views import HTTPMethodView
+from tortoise.contrib.pydantic import (pydantic_model_creator,
+                                       pydantic_queryset_creator)
+from tortoise.exceptions import IntegrityError
+from src.db.models import Bill
 
 blue = Blueprint('transactions', url_prefix='transactions')
+
+
+BillPyd = pydantic_model_creator(Bill)
+BillPydList = pydantic_queryset_creator(Bill)
+
 
 
 class TransactionsView(HTTPMethodView):
