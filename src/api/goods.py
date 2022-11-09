@@ -2,29 +2,34 @@
 """
 from sanic import Blueprint, Request, json
 from sanic_ext import validate
-from tortoise.contrib.pydantic import (pydantic_model_creator,
-                                       pydantic_queryset_creator)
 from tortoise.exceptions import IntegrityError
+from tortoise.models import Model
+from tortoise.transactions import atomic
 
-from src.core.utils import json_response
-from src.db.models import Good
+from src.core.utils import json_response, saving_together
+from src.db.models import Bill, Good
 from src.schemas.goods import (GoodBuySchema, GoodCreateSchema,
                                GoodResponseSchema, GoodUpdateSchema)
 
 blue = Blueprint('goods', url_prefix='/goods')
 
-GoodPyd = pydantic_model_creator(Good)
-GoodPydList = pydantic_queryset_creator(Good)
-
 
 @blue.patch('/buy')
 @validate(json=GoodBuySchema, body_argument='buy')
 async def buy_good(request: Request, buy: GoodBuySchema):
-    good = await Good.get_or_none(pk=buy.pk)
+    good = await Good.get_or_none(pk=buy.good_id)
     if good is None:
-        return json({'detail': buy.dict()}, status=422)
+        return json({'detail': 'buy'}, status=422)
+    if good.amount < buy.amount:
+        return json({'detail': 'amount'})
+    bill = await Bill.get(pk=buy.bill_id)
+    payment = good.price * buy.amount
+    if payment > bill.balance:
+        return json({'detail': 'balance'})
+    
+    bill.balance -= payment    
     good.amount -= buy.amount
-    await good.save()
+    await saving_together(bill, good)
     return await json_response(GoodResponseSchema, good)
 
 

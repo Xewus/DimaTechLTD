@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from pydantic import (BaseModel, Field, NonNegativeInt, PositiveInt)
+from pydantic import BaseModel, Field, NonNegativeInt, PositiveInt
 
 
 class GoodCreateSchema(BaseModel):
@@ -24,7 +24,8 @@ class GoodCreateSchema(BaseModel):
 
 
 class GoodBuySchema(BaseModel):
-    pk: PositiveInt = Field(
+    bill_id: PositiveInt
+    good_id: PositiveInt = Field(
         description='id товара'
     )
     amount: PositiveInt = Field(

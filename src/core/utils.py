@@ -1,7 +1,15 @@
 from pydantic import BaseModel as PydanticModel
 from sanic import json
 from sanic.response import HTTPResponse
+from tortoise.models import Model
 from tortoise.queryset import QuerySet, QuerySetSingle
+from tortoise.transactions import atomic
+
+
+@atomic()
+async def saving_together(*objs: tuple[Model]):
+    for obj in objs:
+        await obj.save()
 
 
 async def json_response(

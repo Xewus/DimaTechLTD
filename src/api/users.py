@@ -5,7 +5,7 @@ from sanic_ext import validate
 from tortoise.exceptions import IntegrityError
 
 from src.core.utils import json_response
-from src.db.models import User
+from src.db.models import Bill, User
 from src.schemas.users import (UserCreateSchema, UserResponseSchema,
                                UserUpdateSchema)
 
@@ -20,7 +20,7 @@ async def get_all_users(request: Request):
 
 @blue.get('/<user_id:int>')
 async def get_user(request: Request, user_id: int):
-    user: User = await User.get_or_none(pk=user_id)
+    user: User = await User.get_or_none(pk=user_id).select_related('bills')
     if user is None:
         return json({'detail': 'username'}, status=422)
     return await json_response(UserResponseSchema, user)
@@ -29,11 +29,11 @@ async def get_user(request: Request, user_id: int):
 @blue.post('/')
 @validate(json=UserCreateSchema, body_argument='new_user')
 async def create_user(request: Request, new_user: UserCreateSchema):
-    user = new_user.dict()
+    user = new_user.dict(exclude_none=True)
     try:
         user = await User.create(**user)
     except IntegrityError:
-        return json({'detail': new_user.username}, status=422)
+        return json({'detail': 'username'}, status=422)
     return await json_response(UserResponseSchema, user)
 
 
@@ -53,7 +53,6 @@ async def update_user(request: Request, user_id: int, update_data: UserUpdateSch
     user: User = await User.get_or_none(pk=user_id)
     if user is None:
         return json({'detail': 'username'}, status=422)
-    print(update_data.dict())
     user.update_from_dict(update_data.dict(exclude_none=True))
     await user.save()
     return await json_response(UserResponseSchema, user)

@@ -1,7 +1,14 @@
-from pydantic import BaseModel, Field, PositiveInt
 from decimal import Decimal
 
-class BillCreateSchema(BaseModel):
+from pydantic import BaseModel, Field, PositiveInt
+
+
+class BillUserSchema(BaseModel):
+    user_id: PositiveInt = Field(
+        description='`id` владельца счёта'
+    )
+
+class BillCreateSchema(BillUserSchema):
     bill_id: PositiveInt | None = Field(
         description='`id` счёта',
         default=None
@@ -12,18 +19,20 @@ class BillCreateSchema(BaseModel):
         max_digits=12,
         decimal_places=2
     )
-    user_id: PositiveInt = Field(
-        description='`id` владельца счёта'
+
+
+class BillUpdateSchema(BaseModel):
+    balance: Decimal = Field(
+        description='Баланс счёта',
+        max_digits=12,
+        decimal_places=2
     )
 
 
-class BillResponceSchema(BaseModel):
+class BillResponseSchema(BillUserSchema):
     bill_id: PositiveInt = Field(
         description='`id` счёта'
     )
     balance: Decimal | None = Field(
         description='Баланс счёта'
-    )
-    user_id: PositiveInt = Field(
-        description='`id` владельца счёта'
     )
