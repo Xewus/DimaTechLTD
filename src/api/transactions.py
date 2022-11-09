@@ -7,7 +7,8 @@ from tortoise.contrib.pydantic import (pydantic_model_creator,
                                        pydantic_queryset_creator)
 from tortoise.exceptions import IntegrityError
 
-from src.db.models import Bill
+from src.db.models import Bill, Transaction
+from src.generics.views import ApiGetMixin, ApiPosMixin
 
 blue = Blueprint('transactions', url_prefix='transactions')
 
@@ -16,23 +17,20 @@ BillPyd = pydantic_model_creator(Bill)
 BillPydList = pydantic_queryset_creator(Bill)
 
 
+class BillView(ApiGetMixin, ApiPosMixin):
+    model = Bill
+    one = True
+    many = True
 
-class TransactionsView(HTTPMethodView):
+
+class TransactionsView(ApiGetMixin, ApiPosMixin):
     """Обработка платежей.
-
-    #### Methods:
-    - GET:
-        Если передан `user_id`, показать транзакции указанного пользователя.
-        Иначе показать все транзакции.
-    - POST:
-        Провести новую транзакцию.
     """
-    async def get(self, request: Request, user_id: int | None = None) -> HTTPResponse:
-        if user_id is not None:
-            return json({user_id:[1, 2]})
-        return json([1, 2 ,3])
+    model = Transaction
+    one = True
+    many = True
     
-    async def put(self, request: Request) -> HTTPResponse:
+    async def post(self, request: Request) -> HTTPResponse:
         return json({
             'signature': 'f4eae5b2881d8b6a1455f62502d08b2258d80084',
             'transaction_id': 1234567,
@@ -42,9 +40,6 @@ class TransactionsView(HTTPMethodView):
         })
 
 
-# Warning: [DEPRECATION v23.3]
-# Duplicate route names detected: SanicApp.transactions.TransactionsView.
-# In the future, Sanic will enforce uniqueness in route naming.
 blue.add_route(
     handler=TransactionsView.as_view(),
     uri='/<user_id:int>',

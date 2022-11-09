@@ -41,8 +41,6 @@ blue.add_route(
     uri='/buy/<pk:int>',
     methods=['PATCH']
 )
-
-
 blue.add_route(
     handler=GoodsView.as_view(),
     uri='/',

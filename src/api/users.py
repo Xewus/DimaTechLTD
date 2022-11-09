@@ -1,13 +1,14 @@
 """Эндпоинты для пользователей.
 """
-from sanic import Blueprint, Request
-from sanic.response import HTTPResponse, json
+from sanic import Blueprint, Request, json
 from tortoise.contrib.pydantic import (pydantic_model_creator,
                                        pydantic_queryset_creator)
 from tortoise.exceptions import IntegrityError
+from sanic_ext import validate
+from src.core.utils import json_response
 
 from src.db.models import User
-from src.generics.views import ApiGetMixin, ApiPatchMixin, ApiPosMixin
+from src.schemas.users import UserCreateSchema, UserResponseSchema, UserUpdateSchema
 
 blue = Blueprint('users', url_prefix='/users')
 
@@ -15,47 +16,50 @@ UserPyd = pydantic_model_creator(User)
 UserPydList = pydantic_queryset_creator(User)
 
 
-
-class UserView(ApiGetMixin, ApiPosMixin, ApiPatchMixin):
-    model = User
-    one = True
-    many = True
-
-
-@blue.route('/me')
-async def me(request: Request) -> HTTPResponse:
-    user = await UserPyd.from_queryset_single(User.get(user_id=1))
-    return json(user.dict())
+@blue.get('/')
+async def all_users(request: Request):
+    users = await User.all()
+    return await json_response(UserResponseSchema, users, many=True)
 
 
-@blue.route('/login', methods=['POST'])
-async def login(request: Request) -> HTTPResponse:
-    return json({'Bearer': 'kjklk'})
+@blue.post('/')
+@validate(json=UserCreateSchema, body_argument='new_user')
+async def create_user(request: Request, new_user: UserCreateSchema):
+    user = new_user.dict()
+    try:
+        user = await User.create(**user)
+    except IntegrityError:
+        return json({'detail': new_user.username}, status=422)
+    return await json_response(UserResponseSchema, user)
 
 
-@blue.route('/activ/<username:str>', methods=['PATCH'])
-async def activ(request: Request, username: str) -> HTTPResponse:
+@blue.patch('/active/<username:str>')
+async def activ(request: Request, username: str):
     user = await User.get_or_none(username=username)
     if user is None:
         return json({'detail': 'username'}, status=422)
     user.active = not user.active
     await user.save()
-    user = await UserPyd.from_tortoise_orm(user)
-    return json(user.dict())
+    return await json_response(UserResponseSchema, user)
 
 
-blue.add_route(
-    handler=UserView.as_view(),
-    uri='/all',
-    methods=['GET']
-)
-blue.add_route(
-    handler=UserView.as_view(),
-    uri='/<pk:int>',
-    methods=['GET', 'PATCH']
-)
-blue.add_route(
-    handler=UserView.as_view(),
-    uri='/',
-    methods=['POST']
-)
+@blue.patch('/<username:str>')
+@validate(json=UserUpdateSchema, body_argument='update_data')
+async def update_user(request: Request, username: str, update_data: UserUpdateSchema):
+    user: User = await User.get_or_none(username=username)
+    if user is None:
+        return json({'detail': 'username'}, status=422)
+    user.update_from_dict(update_data.dict())
+    user.save()
+    return await json_response(UserResponseSchema, user)
+
+
+@blue.get('/me')
+async def me(request: Request):
+    user = await User.get(user_id=1)
+    return await json_response(UserResponseSchema, user)
+
+
+@blue.post('/login')
+async def login(request: Request):
+    return json({'Bearer': 'kjklk'})
