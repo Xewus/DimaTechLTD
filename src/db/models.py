@@ -58,7 +58,7 @@ class User(Model):
         #### Args:
         - password (str): Пароль.
         """
-        self.hash = pass_context.hash(password)
+        self.hash = pass_context.hash(str(password))
 
     def verify_password(self, password: str) -> bool:
         """Проверить соответсвие пароля и хэша.
@@ -69,7 +69,7 @@ class User(Model):
         #### Returns:
         - bool: Правильный ли пароль.
         """
-        return pass_context.verify(password, self.hash)
+        return pass_context.verify(str(password), self.hash)
 
     @staticmethod
     async def authenticate_user(
@@ -116,6 +116,7 @@ class Good(Model):
         validators=[PositiveNumberlValidator],
         description='Количество товара'   
     )
+
 
 class Bill(Model):
     bill_id = fields.BigIntField(pk=True)

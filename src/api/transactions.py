@@ -6,6 +6,7 @@ from sanic.views import HTTPMethodView
 from tortoise.contrib.pydantic import (pydantic_model_creator,
                                        pydantic_queryset_creator)
 from tortoise.exceptions import IntegrityError
+
 from src.db.models import Bill
 
 blue = Blueprint('transactions', url_prefix='transactions')

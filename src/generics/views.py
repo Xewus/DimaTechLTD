@@ -1,11 +1,12 @@
-from sanic.views import HTTPMethodView
-from tortoise.models import Model
+from typing import Iterable
+
 from sanic import Request, json
 from sanic.response import HTTPResponse
+from sanic.views import HTTPMethodView
 from tortoise.contrib.pydantic import (pydantic_model_creator,
                                        pydantic_queryset_creator)
-from typing import Iterable
 from tortoise.exceptions import IntegrityError
+from tortoise.models import Model
 
 
 class BaseView(HTTPMethodView):

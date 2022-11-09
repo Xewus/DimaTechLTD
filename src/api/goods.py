@@ -5,8 +5,10 @@ from sanic.response import HTTPResponse
 from sanic.views import HTTPMethodView
 from tortoise.contrib.pydantic import (pydantic_model_creator,
                                        pydantic_queryset_creator)
+
 from src.db.models import Good
-from src.generics.views import ApiGetMixin, ApiPosMixin, ApiPatchMixin, ApiDeleteMixin
+from src.generics.views import (ApiDeleteMixin, ApiGetMixin, ApiPatchMixin,
+                                ApiPosMixin)
 
 blue = Blueprint('goods', url_prefix='/goods')
 
