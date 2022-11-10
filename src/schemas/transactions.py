@@ -3,6 +3,7 @@ from hashlib import sha1
 from pydantic import PositiveInt, ValidationError, root_validator
 
 from src.settings import APP_KEY
+from sanic.exceptions import SanicException
 
 from .generics import BillIdSchema, UserIdSchema
 
@@ -35,5 +36,5 @@ class Createchema(ResponseSchema):
         s = f"{APP_KEY}:{values['transaction_id']}:{values['user_id']}:{values['bill_id']}:{values['amount']}".encode()
         sign.update(s)
         if sign.hexdigest() != values['signature']:
-            raise ValidationError('Сигнатура не соответсвует данным')
+            raise SanicException('Signatura', 400)
         return values
