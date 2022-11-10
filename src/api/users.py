@@ -14,12 +14,14 @@ blue = Blueprint('users', url_prefix='/users')
 
 @blue.get('/')
 async def get_all_users(request: Request):
+    """Прказать всех пользователей."""
     users = await User.all()
     return await json_response(UserResponseSchema, users, many=True)
 
 
 @blue.get('/<user_id:int>')
 async def get_user(request: Request, user_id: int):
+    """Показать указанного пользователя."""
     user: User = await User.get_or_none(pk=user_id).select_related('bills')
     if user is None:
         return json({'detail': 'username'}, status=422)
@@ -29,6 +31,7 @@ async def get_user(request: Request, user_id: int):
 @blue.post('/')
 @validate(json=UserCreateSchema, body_argument='new_user')
 async def create_user(request: Request, new_user: UserCreateSchema):
+    """Создать нового пользователя."""
     user = new_user.dict(exclude_none=True)
     try:
         user = await User.create(**user)
@@ -39,6 +42,7 @@ async def create_user(request: Request, new_user: UserCreateSchema):
 
 @blue.patch('/active/<user_id:int>')
 async def activ(request: Request, user_id: int):
+    "Активировать/деактивировать пользователя."
     user = await User.get_or_none(pk=user_id)
     if user is None:
         return json({'detail': 'username'}, status=422)
@@ -50,6 +54,7 @@ async def activ(request: Request, user_id: int):
 @blue.patch('/<user_id:int>')
 @validate(json=UserUpdateSchema, body_argument='update_data')
 async def update_user(request: Request, user_id: int, update_data: UserUpdateSchema):
+    """Изменить пользователя."""
     user: User = await User.get_or_none(pk=user_id)
     if user is None:
         return json({'detail': 'username'}, status=422)
@@ -60,10 +65,12 @@ async def update_user(request: Request, user_id: int, update_data: UserUpdateSch
 
 @blue.get('/me')
 async def me(request: Request):
+    """Показать данные о себе."""
     user = await User.get(user_id=1)
     return await json_response(UserResponseSchema, user)
 
 
 @blue.post('/login')
 async def login(request: Request):
+    """Залогиниться."""
     return json({'Bearer': 'kjklk'})

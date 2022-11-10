@@ -26,7 +26,7 @@ class GoodCreateSchema(BaseModel):
 class GoodBuySchema(BaseModel):
     bill_id: PositiveInt
     good_id: PositiveInt = Field(
-        description='id товара'
+        description='id товаров'
     )
     amount: PositiveInt = Field(
         description='Количество товара',
