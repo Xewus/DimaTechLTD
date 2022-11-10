@@ -8,6 +8,7 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 BASE_DIR = Path(__file__).resolve().resolve
 
 APP_NAME = config('APP_NAME', default='Application')
+APP_KEY = config('APP_KEY', default='appkey')
 
 class AppConfig(Config):
     DEBUG = True

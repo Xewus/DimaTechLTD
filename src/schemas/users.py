@@ -1,25 +1,28 @@
-from pydantic import BaseModel, Field, PositiveInt
+from pydantic import BaseModel, Field
+
+from .generics import UserIdSchema
 
 
-class UserCreateSchema(BaseModel):
+class UserNameSchema(BaseModel):
     username: str = Field(
+        description='Юзернейм пользователя',
         min_length=3,
         max_length=10
     )
+
+
+class ResponseSchema(UserIdSchema, UserNameSchema):
+    active: bool
+    admin: bool
+
+
+class CreateSchema(UserNameSchema):
     password: str = Field(
         max_length=8
     )
 
 
-class UserUpdateSchema(BaseModel):
-    username: str
+class UpdateSchema(UserNameSchema):
     password: str | None
     active: bool | None
     admin: bool | None
-
-
-class UserResponseSchema(BaseModel):
-    user_id: PositiveInt
-    username: str
-    active: bool
-    admin: bool

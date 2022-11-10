@@ -3,20 +3,18 @@
 from sanic import Blueprint, Request, json
 from sanic_ext import validate
 from tortoise.exceptions import IntegrityError
-from tortoise.models import Model
-from tortoise.transactions import atomic
 
-from src.core.utils import json_response, saving_together
+from src.core.utils import json_response, atomic_execute
 from src.db.models import Bill, Good
-from src.schemas.goods import (GoodBuySchema, GoodCreateSchema,
-                               GoodResponseSchema, GoodUpdateSchema)
+from src.schemas.goods import (BuySchema, CreateSchema, ResponseSchema,
+                               UpdateSchema)
 
 blue = Blueprint('goods', url_prefix='/goods')
 
 
 @blue.patch('/buy')
-@validate(json=GoodBuySchema, body_argument='buy')
-async def buy_good(request: Request, buy: GoodBuySchema):
+@validate(json=BuySchema, body_argument='buy')
+async def buy_view(request: Request, buy: BuySchema):
     """Купить товар. Можно реаоизовать покупку разных товаров."""
     good = await Good.get_or_none(pk=buy.good_id)
     if good is None:
@@ -31,56 +29,59 @@ async def buy_good(request: Request, buy: GoodBuySchema):
     
     bill.balance -= payment    
     good.amount -= buy.amount
-    await saving_together(bill, good)
+    try:
+        await atomic_execute(bill.save, good.save)
+    except IntegrityError:
+        return json({'detail': 'db'})
+
 
     # Показать покупателю количество купленного товара
     good.amount = buy.amount
-    return await json_response(GoodResponseSchema, good)
+    return await json_response(ResponseSchema, good)
 
 
 @blue.get('/')
-async def get_all_goods(request: Request):
+async def get_all_view(request: Request):
     """Показать все товары."""
     goods = await Good.all()
-    return await json_response(GoodResponseSchema, goods, many=True)
+    return await json_response(ResponseSchema, goods, many=True)
 
 
 @blue.get('/<good_id:int>')
-async def get_goog(request: Request, good_id: int):
+async def get_one_view(request: Request, good_id: int):
     """Показать указанныйтовар."""
     good: Good = await Good.get_or_none(pk=good_id)
     if good is None:
         return json({'detail': 'good'}, status=422)
-    return await json_response(GoodResponseSchema, good)
-
+    return await json_response(ResponseSchema, good)
 
 
 @blue.post('/')
-@validate(json=GoodCreateSchema, body_argument='new_good')
-async def create_good(request: Request, new_good: GoodCreateSchema):
+@validate(json=CreateSchema, body_argument='new_good')
+async def create_view(request: Request, new_good: CreateSchema):
     """Добавить новый товар."""
     good = new_good.dict()
     try:
         good = await Good.create(**good)
     except IntegrityError:
         return json({'detail': new_good.username}, status=422)
-    return await json_response(GoodResponseSchema, good)
+    return await json_response(ResponseSchema, good)
 
 
 @blue.patch('/<good_id:int>')
-@validate(json=GoodUpdateSchema, body_argument='update_data')
-async def update_user(request: Request, good_id: int, update_data: GoodUpdateSchema):
+@validate(json=UpdateSchema, body_argument='update_data')
+async def update_view(request: Request, good_id: int, update_data: UpdateSchema):
     """Изменить товар"""
     good: Good = await Good.get_or_none(pk=good_id)
     if good is None:
         return json({'detail': 'good'}, status=422)
     good.update_from_dict(update_data.dict(exclude_none=True))
     await good.save()
-    return await json_response(GoodResponseSchema, good)
+    return await json_response(ResponseSchema, good)
 
 
 @blue.delete('/<good_id:int>')
-async def delete_good(request: Request, good_id: int):
+async def delete_view(request: Request, good_id: int):
     """Удалить товар."""
     good: Good = await Good.get_or_none(pk=good_id)
     if good is None:
