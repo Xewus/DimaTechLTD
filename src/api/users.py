@@ -1,12 +1,12 @@
 """Эндпоинты для пользователей.
 """
 from sanic import Blueprint, Request, json
-from sanic_ext import validate
-from tortoise.exceptions import IntegrityError
 
-from src.core.utils import json_response
-from src.db.models import Bill, User
+from src.core.views import json_response
+from src.db.crud import create, update_object
+from src.db.models import User
 from src.schemas.users import CreateSchema, ResponseSchema, UpdateSchema
+from src.schemas.validators import get_exists_object, validation
 
 blue = Blueprint('users', url_prefix='/users')
 
@@ -21,44 +21,33 @@ async def get_all_view(request: Request):
 @blue.get('/<user_id:int>')
 async def get_one_view(request: Request, user_id: int):
     """Показать указанного пользователя."""
-    user: User = await User.get_or_none(pk=user_id).select_related('bills')
-    if user is None:
-        return json({'detail': 'username'}, status=422)
+    user = await get_exists_object(user_id, User)
     return await json_response(ResponseSchema, user)
 
 
 @blue.post('/')
-@validate(json=CreateSchema, body_argument='new_user')
-async def create_view(request: Request, new_user: CreateSchema):
+async def create_view(request: Request):
     """Создать нового пользователя."""
-    user = new_user.dict(exclude_none=True)
-    try:
-        user = await User.create(**user)
-    except IntegrityError:
-        return json({'detail': 'username'}, status=422)
+    user = await validation(request, CreateSchema)
+    user = await create(user, User)
     return await json_response(ResponseSchema, user)
 
 
 @blue.patch('/active/<user_id:int>')
 async def activation_view(request: Request, user_id: int):
     "Активировать/деактивировать пользователя."
-    user = await User.get_or_none(pk=user_id)
-    if user is None:
-        return json({'detail': 'username'}, status=422)
+    user = await get_exists_object(user_id, User)
     user.active = not user.active
     await user.save()
     return await json_response(ResponseSchema, user)
 
 
 @blue.patch('/<user_id:int>')
-@validate(json=UpdateSchema, body_argument='update_data')
-async def update_view(request: Request, user_id: int, update_data: UpdateSchema):
+async def update_view(request: Request, user_id: int):
     """Изменить пользователя."""
-    user: User = await User.get_or_none(pk=user_id)
-    if user is None:
-        return json({'detail': 'username'}, status=422)
-    user.update_from_dict(update_data.dict(exclude_none=True))
-    await user.save()
+    user = await get_exists_object(user_id, User)
+    update_data = await validation(request, UpdateSchema)
+    await update_object(user, update_data, User)
     return await json_response(ResponseSchema, user)
 
 

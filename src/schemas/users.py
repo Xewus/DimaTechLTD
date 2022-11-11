@@ -15,6 +15,9 @@ class ResponseSchema(UserIdSchema, UserNameSchema):
     active: bool
     admin: bool
 
+    class Config:
+        orm_mode = True
+
 
 class CreateSchema(UserNameSchema):
     password: str = Field(

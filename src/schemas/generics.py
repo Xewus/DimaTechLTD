@@ -8,12 +8,12 @@ class UserIdSchema(BaseModel):
 
 
 class BillIdSchema(BaseModel):
-    bill_id: PositiveInt= Field(
+    bill_id: PositiveInt = Field(
         description='Идентификатор счёта'
     )
 
 
-class GoodIdSchema(BaseModel):
-    good_id: PositiveInt= Field(
+class ProductIdSchema(BaseModel):
+    product_id: PositiveInt = Field(
         description='Идентификатор товара'
     )

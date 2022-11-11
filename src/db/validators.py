@@ -3,7 +3,7 @@ from tortoise.validators import Validator
 
 
 class PositiveNumberlValidator(Validator):
-    """Допускает только положительнык значения.
+    """Допускает только положительные значения.
     """
     def __init__(self, wirh_zero: bool = False) -> None:
         super().__init__()
@@ -11,4 +11,4 @@ class PositiveNumberlValidator(Validator):
 
     def __call__(self, num: int | float):
         if not num > int(self.with_zero):
-            raise ValidationError('Значение %s не положительное' % num)
+            raise ValidationError('Value is not %s positive' % num)

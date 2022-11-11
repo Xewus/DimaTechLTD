@@ -2,10 +2,10 @@ from decimal import Decimal
 
 from pydantic import BaseModel, Field, NonNegativeInt, PositiveInt
 
-from .generics import BillIdSchema, GoodIdSchema
+from .generics import BillIdSchema, ProductIdSchema
 
 
-class BuySchema(BillIdSchema, GoodIdSchema):
+class BuySchema(BillIdSchema, ProductIdSchema):
     amount: PositiveInt | None = Field(
         description='Количество товара',
         default=1
@@ -13,7 +13,7 @@ class BuySchema(BillIdSchema, GoodIdSchema):
 
 
 class CreateSchema(BaseModel):
-    name: str = Field(    
+    name: str = Field(
         description='Название товара',
         max_length=255
     )
@@ -39,7 +39,7 @@ class UpdateSchema(BillIdSchema):
         max_length=255
     )
     description: str | None = Field(
-        description='Описание товара', 
+        description='Описание товара',
         default=None
     )
     price: Decimal | None = Field(
@@ -49,10 +49,11 @@ class UpdateSchema(BillIdSchema):
         decimal_places=2
     )
     amount: NonNegativeInt | None = Field(
-        description='Количество товара', 
+        description='Количество товара',
         default=None
     )
 
 
-class ResponseSchema(GoodIdSchema, CreateSchema):
-    ...
+class ResponseSchema(ProductIdSchema, CreateSchema):
+    class Config:
+        orm_mode = True

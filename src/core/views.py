@@ -1,3 +1,4 @@
+from pydantic import BaseModel as PydanticModel
 from sanic import Request, json
 from sanic.response import HTTPResponse
 from sanic.views import HTTPMethodView
@@ -5,6 +6,17 @@ from tortoise.contrib.pydantic import (pydantic_model_creator,
                                        pydantic_queryset_creator)
 from tortoise.exceptions import IntegrityError
 from tortoise.models import Model
+from tortoise.queryset import QuerySet, QuerySetSingle
+
+
+async def json_response(
+    schema: PydanticModel,
+    queryset: QuerySet | QuerySetSingle,
+    many: bool = False
+) -> HTTPResponse:
+    if not many:
+        return json(schema.from_orm(queryset).dict())
+    return json([schema.from_orm(obj).dict() for obj in queryset])
 
 
 class BaseView(HTTPMethodView):
@@ -14,7 +26,7 @@ class BaseView(HTTPMethodView):
     - model (Model): Модель ORM с которой работает класс.
     - one (bool):Вывод одного объекта.
     - many (bool): Вывод спимска объектов.
-    """ 
+    """
     model: Model = None
     one: bool = False
     many: bool = False
@@ -30,14 +42,16 @@ class BaseView(HTTPMethodView):
 
 
 class ApiGetMixin(BaseView):
-    async def get(self, request: Request, pk: int | None = None) -> HTTPResponse:
+    async def get(
+        self, request: Request, pk: int | None = None
+    ) -> HTTPResponse:
         if pk is not None:
             obj = await self.model.get_or_none(pk=pk)
             if obj is None:
                 return json({'detail': request.json}, status=422)
             obj = await self.pydantic_model.from_tortoise_orm(obj)
             return json(obj.dict())
-        
+
         objs = await self.pydantic_list.from_queryset(self.model.all())
         return json(objs.dict()['__root__'])
 

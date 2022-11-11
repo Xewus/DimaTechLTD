@@ -1,9 +1,7 @@
-from hashlib import sha1
+from pydantic import PositiveInt, root_validator
 
-from pydantic import PositiveInt, ValidationError, root_validator
-
-from src.settings import APP_KEY
-from sanic.exceptions import SanicException
+from src.core.exceptions import BadRequestException
+from src.core.utils import make_signature
 
 from .generics import BillIdSchema, UserIdSchema
 
@@ -13,28 +11,21 @@ class StorySchema(UserIdSchema):
 
 
 class ResponseSchema(BillIdSchema, StorySchema):
-    signature: str | None = None
+    signature: str
     transaction_id: PositiveInt
     amount: PositiveInt
 
-    @root_validator
-    def validate_signature(cls, values: dict) -> dict:
-        sign = sha1()
-        sign.update(
-            f"{APP_KEY}:{values['transaction_id']}:{values['user_id']}:"
-            f"{values['bill_id']}:{values['amount']}".encode()
-        )
-        values['signature'] = sign.hexdigest()           
-        return values
+    class Config:
+        orm_mode = True
 
-class Createchema(ResponseSchema):
-    signature: str
+
+class CreateSchema(ResponseSchema):
+    class Config:
+        orm_mode = False
 
     @root_validator
     def validate_signature(cls, values: dict) -> dict:
-        sign = sha1()
-        s = f"{APP_KEY}:{values['transaction_id']}:{values['user_id']}:{values['bill_id']}:{values['amount']}".encode()
-        sign.update(s)
-        if sign.hexdigest() != values['signature']:
-            raise SanicException('Signatura', 400)
+        signature = make_signature(values)
+        if signature != values['signature']:
+            raise BadRequestException('signature')
         return values

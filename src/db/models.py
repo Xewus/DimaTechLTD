@@ -32,7 +32,7 @@ class User(Model):
         description='Хэш для аутенфитикации'
     )
     admin = fields.BooleanField(
-        default=False,    
+        default=False,
         description='Являяется ли пользователь админом'
     )
     active = fields.BooleanField(
@@ -54,7 +54,7 @@ class User(Model):
 
     def set_hash(self, password: str) -> None:
         """Вычислить и установить атрибут `hash` объекта.
-    
+
         #### Args:
         - password (str): Пароль.
         """
@@ -95,8 +95,8 @@ class User(Model):
         return user
 
 
-class Good(Model):
-    good_id = fields.BigIntField(pk=True)
+class Product(Model):
+    product_id = fields.BigIntField(pk=True)
     name = fields.CharField(
         max_length=255,
         unique=True,
@@ -140,6 +140,10 @@ class Transaction(Model):
         auto_now_add=True,
         description='Дата и время транзакции'
     )
+    signature = fields.CharField(
+        description='Сигнатура платежа',
+        max_length=64
+    )
     amount = fields.DecimalField(
         max_digits=12,
         decimal_places=2,
@@ -151,6 +155,12 @@ class Transaction(Model):
         related_name='transactions',
         on_delete=fields.RESTRICT,
         description='С каким счёта была проведена тразакция'
+    )
+    user = fields.ForeignKeyField(
+        model_name='models.User',
+        related_name='transactions',
+        on_delete=fields.RESTRICT,
+        description='Владелец счёта. Удаление владельца запрещено.'
     )
 
 

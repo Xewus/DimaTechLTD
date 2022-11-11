@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from pydantic import Field, PositiveInt
+from pydantic import BaseModel, Field, PositiveInt
 
 from .generics import BillIdSchema, UserIdSchema
 
@@ -12,8 +12,11 @@ class ResponseSchema(UserIdSchema, BillIdSchema):
         decimal_places=2
     )
 
+    class Config:
+        orm_mode = True
 
-class UpdateSchema(BillIdSchema):
+
+class UpdateSchema(BaseModel):
     balance: Decimal | None = Field(
         description='Баланс счёта',
         default=.0,
@@ -27,4 +30,3 @@ class CreateSchema(UserIdSchema, UpdateSchema):
         description='`id` счёта',
         default=None
     )
-
