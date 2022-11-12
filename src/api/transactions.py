@@ -6,7 +6,7 @@ from sanic_jwt.decorators import inject_user, protected
 
 from src.core.decorators import admin_only, admin_or_owner_only
 from src.core.exceptions import ForbiddenException
-from src.core.views import json_response
+from src.core.responses import json_response
 from src.db.crud import create_transaction
 from src.db.models import Bill, Transaction, User
 from src.schemas.transactions import CreateSchema, ResponseSchema
@@ -32,8 +32,10 @@ async def get_all_view(request: Request):
 async def get_one_view(request: Request, user: User, transaction_id: int):
     """Показать указанного транзакцию."""
     transaction = await get_exists_object(transaction_id, Transaction)
+
     if not user.admin and user.user_id != transaction.user:
         raise ForbiddenException
+
     return await json_response(ResponseSchema, transaction)
 
 
@@ -54,8 +56,10 @@ async def get_user_transactions(request: Request, user_id: int):
 async def get_bill_transactions(request: Request, user: User, bill_id: int):
     """Показать транзакции указанного счётв."""
     bill: Bill = await get_exists_object(bill_id, Bill)
+
     if not user.admin and user.user_id != bill.user:
         raise ForbiddenException
+
     transactions = await Transaction.filter(bill_id=bill_id)
     return await json_response(ResponseSchema, transactions, many=True)
 
@@ -71,8 +75,9 @@ async def replenish_bill(request: Request):
 @blue.delete('/<transaction_id:int>')
 async def delete_view(request: Request, transaction_id: int):
     """Удалить товар."""
-    if DEBUG:
+    if not DEBUG:
         raise ForbiddenException
+
     transaction = await get_exists_object(transaction_id, Transaction)
     await transaction.delete()
     return json('', status=204)

@@ -17,8 +17,10 @@ blue = Blueprint('login', url_prefix='/login')
 async def authenticate(request: Request) -> User:
     if request.json is None:
         raise BadRequestException
+
     login_data = await validation(request, CreateSchema)
     user = await User.get_or_none(username=login_data['username'])
+
     if user is None or not user.active:
         raise BadRequestException('Auth')
 
@@ -29,12 +31,11 @@ async def authenticate(request: Request) -> User:
 
 
 async def retrieve_user(request: Request, payload: dict):
-    if payload:
-        user_id = payload.get('user_id', None)
-        user = await User.get(user_id=user_id)
-        return user
-    else:
+    if not payload:
         return None
+    user_id = payload.get('user_id', 0)
+    user = await User.get_or_none(user_id=user_id)
+    return user
 
 
 @blue.get('/activate/<user_id:int>/<token:str>')
@@ -48,9 +49,12 @@ async def activation(request: Request, user_id: int, token: str):
         )
         if user_id != payload.user_id:
             raise BadRequestException
+
         user: User = await User.get(pk=payload.user_id)
+
     except InvalidSignatureError as err:
         raise BadRequestException(err.args)
+
     except ExpiredSignatureError as err:
         return json(
             {'msg': err.args[0]} | make_activated_link(request, user_id)

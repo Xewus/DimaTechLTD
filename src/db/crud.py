@@ -49,6 +49,7 @@ async def make_deal(product: Product, bill: Bill, buy: dict) -> None:
 async def create_transaction(transaction_data: dict) -> Transaction:
     bill: Bill = await Bill.get_or_none(pk=transaction_data['bill_id'])
     transaction_data['signature'] = make_signature(transaction_data)
+
     async with in_transaction():
         try:
             if bill is None:

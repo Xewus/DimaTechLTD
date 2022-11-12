@@ -4,7 +4,7 @@ from sanic import Blueprint, Request
 from sanic_jwt.decorators import inject_user, protected
 
 from src.core.decorators import admin_only, admin_or_owner_only
-from src.core.views import json_response
+from src.core.responses import json_response
 from src.db.crud import create, update_object
 from src.db.models import User
 from src.schemas.users import (CreateSchema, PasswordSchema, ResponseSchema,

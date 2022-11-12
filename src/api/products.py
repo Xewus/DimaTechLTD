@@ -5,7 +5,7 @@ from sanic_jwt.decorators import inject_user, protected
 
 from src.core.decorators import admin_only
 from src.core.exceptions import BadRequestException
-from src.core.views import json_response
+from src.core.responses import json_response
 from src.db.crud import create, make_deal, update_object
 from src.db.models import Bill, Product, User
 from src.schemas.products import (BuySchema, CreateSchema, ResponseSchema,
@@ -23,6 +23,7 @@ async def buy_view(request: Request, user: User):
     buy = await validation(request, BuySchema)
     product: Product = await get_exists_object(buy['product_id'], Product)
     bill: Bill = await get_exists_object(buy['bill_id'], Bill)
+
     if bill.user_id != user.user_id != bill.user:
         raise BadRequestException('Not bill owner')
 

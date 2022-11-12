@@ -28,7 +28,9 @@ ACTIVATE_TOKEN_EXPIRE = 60 * 15
 
 MAX_LEN_USERNAME = 10
 MIN_LEN_PASSWORD = 8
-# ######################## database ######################## #
+
+# ################################ database ################################ #
+
 FIRST_USER = {
     'username': config('USERNAME', default='User').capitalize(),
     'email': config('EMAIL', default='q@q.qq'),
@@ -54,7 +56,7 @@ TORTOISE_ORM = {
     },
 }
 
-# #################################################################### #
+# ################################# author ################################# #
 
 AUTHOR = {
     'name': 'xewus',
