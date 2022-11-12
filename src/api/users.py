@@ -7,11 +7,13 @@ from src.db.crud import create, update_object
 from src.db.models import User
 from src.schemas.users import CreateSchema, ResponseSchema, UpdateSchema
 from src.schemas.validators import get_exists_object, validation
+from src.api.auth import authenticated
 
 blue = Blueprint('users', url_prefix='/users')
 
 
 @blue.get('/')
+@authenticated
 async def get_all_view(request: Request):
     """Прказать всех пользователей."""
     users = await User.all()
@@ -49,16 +51,3 @@ async def update_view(request: Request, user_id: int):
     update_data = await validation(request, UpdateSchema)
     await update_object(user, update_data, User)
     return await json_response(ResponseSchema, user)
-
-
-@blue.get('/me')
-async def get_me_view(request: Request):
-    """Показать данные о себе."""
-    user = await User.get(user_id=1)
-    return await json_response(ResponseSchema, user)
-
-
-@blue.post('/login')
-async def login_view(request: Request):
-    """Залогиниться."""
-    return json({'Bearer': 'kjklk'})

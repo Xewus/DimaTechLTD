@@ -58,7 +58,7 @@ class User(Model):
         #### Args:
         - password (str): Пароль.
         """
-        self.hash = pass_context.hash(str(password))
+        self.hash = pass_context.hash(password)
 
     def verify_password(self, password: str) -> bool:
         """Проверить соответсвие пароля и хэша.
@@ -69,31 +69,13 @@ class User(Model):
         #### Returns:
         - bool: Правильный ли пароль.
         """
-        return pass_context.verify(str(password), self.hash)
+        return pass_context.verify(password, self.hash)
 
-    @staticmethod
-    async def authenticate_user(
-        username: str, password: str
-    ) -> User:
-        """Проверить наличие пользователя и соответствие пароля.
-
-        #### Args:
-        - username (str): Юзернейм пользователя.
-        - password (str): Пароль введённый пользователем.
-
-        #### Returns:
-        - User: Проверенный пользователь.
-        """
-        user = await User.get_or_none(username=username)
-        if not user:
-            raise Exception(detail='Неправильный юзернейм')
-        if not user.verify_password(password):
-            raise Exception(detail='Неправильный пароль')
-        if not user.active:
-            raise Exception(detail='Неактивный пользователь')
-
-        return user
-
+    def to_dict(self):
+        return {
+            'user_id': self.user_id,
+            'username': self.username
+        }
 
 class Product(Model):
     product_id = fields.BigIntField(pk=True)

@@ -2,14 +2,16 @@ import logging
 import sys
 
 from sanic import Sanic
+from sanic_jwt import Initialize
 from tortoise.contrib.sanic import register_tortoise
 
+from src.api.auth import authenticate, retrieve_user
 from src.api.bills import blue as blue_bills
 from src.api.products import blue as blue_products
 from src.api.transactions import blue as blue_transactions
 from src.api.users import blue as blue_users
 from src.db.models import create_first_user
-from src.settings import APP_NAME, TORTOISE_CONFIG
+from src.settings import APP_NAME, TORTOISE_CONFIG, APP_KEY
 
 fmt = logging.Formatter(
     fmt="%(asctime)s - %(message)s",
@@ -24,25 +26,27 @@ logger_db_client = logging.getLogger("tortoise.db_client")
 logger_db_client.setLevel(logging.DEBUG)
 logger_db_client.addHandler(sh)
 
-logger_tortoise = logging.getLogger("tortoise")
-logger_tortoise.setLevel(logging.DEBUG)
-logger_tortoise.addHandler(sh)
-
 
 app = Sanic(name=APP_NAME)
+
 
 app.blueprint(blueprint=blue_users)
 app.blueprint(blueprint=blue_products)
 app.blueprint(blueprint=blue_bills)
 app.blueprint(blueprint=blue_transactions)
 
-print(app.blueprints)
 
 register_tortoise(
     app,
     **TORTOISE_CONFIG
 )
 
+Initialize(
+    app,
+    # secret=APP_KEY,
+    authenticate=authenticate,
+    retrieve_user=retrieve_user
+)
 
 @app.listener("before_server_start")
 async def before_server_start(app, loop):

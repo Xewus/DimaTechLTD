@@ -21,7 +21,7 @@ class ResponseSchema(UserIdSchema, UserNameSchema):
 
 class CreateSchema(UserNameSchema):
     password: str = Field(
-        max_length=8
+        min_length=8
     )
 
 
