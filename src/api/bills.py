@@ -53,7 +53,7 @@ async def create_view(request: Request, user: User):
     """Создать новый счёт."""
     bill = {'user_id': user.user_id}
     if request.json:
-        bill.update( await validation(request, CreateSchema))
+        bill.update(await validation(request, CreateSchema))
     bill: Bill = await create(bill, Bill)
     return await json_response(ResponseSchema, bill)
 

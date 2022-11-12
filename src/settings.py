@@ -24,6 +24,7 @@ DB_URL = 'postgresql://postgres:postgres@localhost/postgres'
 SECRET_KEY = config('SECRET_KEY', default='secretkey')
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE = 60 * 60 * 12
+ACTIVATE_TOKEN_EXPIRE = 60 * 15
 
 MAX_LEN_USERNAME = 10
 MIN_LEN_PASSWORD = 8

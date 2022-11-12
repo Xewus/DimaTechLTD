@@ -5,7 +5,9 @@ from sanic import Sanic
 from sanic_jwt import Initialize
 from tortoise.contrib.sanic import register_tortoise
 
-from src.api.auth import authenticate, retrieve_user
+from src.api.auth import authenticate
+from src.api.auth import blue as blue_auth
+from src.api.auth import retrieve_user
 from src.api.bills import blue as blue_bills
 from src.api.products import blue as blue_products
 from src.api.transactions import blue as blue_transactions
@@ -31,6 +33,7 @@ logger_db_client.addHandler(sh)
 app = Sanic(name=APP_NAME)
 app.config.SANIC_JWT_ACCESS_TOKEN_NAME = 'access_token'
 
+app.blueprint(blueprint=blue_auth)
 app.blueprint(blueprint=blue_users)
 app.blueprint(blueprint=blue_products)
 app.blueprint(blueprint=blue_bills)
@@ -50,6 +53,7 @@ Initialize(
     authenticate=authenticate,
     retrieve_user=retrieve_user
 )
+
 
 @app.listener("before_server_start")
 async def before_server_start(app, loop):

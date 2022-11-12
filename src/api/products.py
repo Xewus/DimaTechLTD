@@ -24,7 +24,7 @@ async def buy_view(request: Request, user: User):
     product: Product = await get_exists_object(buy['product_id'], Product)
     bill: Bill = await get_exists_object(buy['bill_id'], Bill)
     if bill.user_id != user.user_id != bill.user:
-        raise BadRequestException(f'Not bill owner')
+        raise BadRequestException('Not bill owner')
 
     await make_deal(product, bill, buy)
     product.amount = buy['amount']

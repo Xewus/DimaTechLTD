@@ -1,6 +1,6 @@
 """Эндпоинты для пользователей.
 """
-from sanic import Blueprint, Request, json
+from sanic import Blueprint, Request
 from sanic_jwt.decorators import inject_user, protected
 
 from src.core.decorators import admin_only, admin_or_owner_only
@@ -64,6 +64,7 @@ async def update_view(request: Request, user_id: int):
     update_data = await validation(request, UpdateSchema)
     await update_object(user, update_data, User)
     return await json_response(ResponseSchema, user)
+
 
 @blue.post('/change_password/<user_id:int>')
 @inject_user()

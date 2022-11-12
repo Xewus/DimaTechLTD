@@ -10,6 +10,7 @@ class UserNameSchema(BaseModel):
         max_length=10
     )
 
+
 class PasswordSchema(BaseModel):
     password: str = Field(
         description='Пароль пользователя',

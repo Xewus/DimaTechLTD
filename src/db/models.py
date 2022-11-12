@@ -77,6 +77,7 @@ class User(Model):
             'username': self.username
         }
 
+
 class Product(Model):
     product_id = fields.BigIntField(pk=True)
     name = fields.CharField(
