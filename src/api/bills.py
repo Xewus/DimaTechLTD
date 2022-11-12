@@ -7,21 +7,31 @@ from src.db.crud import create, update_object
 from src.db.models import Bill, User
 from src.schemas.bills import CreateSchema, ResponseSchema, UpdateSchema
 from src.schemas.validators import get_exists_object, validation
+from src.core.decorators import admin_only, admin_or_owner_only
+from sanic_jwt.decorators import protected, inject_user
+from src.core.exceptions import ForbiddenException
 
 blue = Blueprint('bills', url_prefix='/bills')
 
 
 @blue.get('/')
-async def get_all_view(request: Request):
+@inject_user()
+@protected()
+@admin_only
+async def get_all_view(request: Request, **_):
     """Показать все счета."""
     bills = await Bill.all()
     return await json_response(ResponseSchema, bills, many=True)
 
 
 @blue.get('/<bill_id:int>')
-async def get_one_view(request: Request, bill_id: int):
-    """Показать указанный счёт"""
-    bill = await get_exists_object(bill_id, Bill)
+@inject_user()
+@protected()
+async def get_one_view(request: Request, user: User, bill_id: int, **_):
+    """Показать указанный счёт."""
+    bill: Bill = await get_exists_object(bill_id, Bill)
+    if not(user.admin or not bill or user.user_id != bill.user):
+        raise ForbiddenException
     return await json_response(ResponseSchema, bill)
 
 

@@ -7,23 +7,29 @@ from src.db.crud import create, update_object
 from src.db.models import User
 from src.schemas.users import CreateSchema, ResponseSchema, UpdateSchema
 from src.schemas.validators import get_exists_object, validation
-from src.api.auth import authenticated
+from src.core.decorators import admin_only, admin_or_owner_only
+from sanic_jwt.decorators import protected, inject_user
 
 blue = Blueprint('users', url_prefix='/users')
 
 
 @blue.get('/')
-@authenticated
-async def get_all_view(request: Request):
+@inject_user()
+@protected()
+@admin_only
+async def get_all_view(request: Request, **_):
     """Прказать всех пользователей."""
     users = await User.all()
     return await json_response(ResponseSchema, users, many=True)
 
 
 @blue.get('/<user_id:int>')
-async def get_one_view(request: Request, user_id: int):
+@inject_user()
+@protected()
+@admin_or_owner_only
+async def get_one_view(request: Request, **kwargs):
     """Показать указанного пользователя."""
-    user = await get_exists_object(user_id, User)
+    user = await get_exists_object(kwargs.get('user_id', 0), User)
     return await json_response(ResponseSchema, user)
 
 
@@ -36,7 +42,10 @@ async def create_view(request: Request):
 
 
 @blue.patch('/active/<user_id:int>')
-async def activation_view(request: Request, user_id: int):
+@inject_user()
+@protected()
+@admin_only
+async def activation_view(request: Request, user_id: int, **_):
     "Активировать/деактивировать пользователя."
     user = await get_exists_object(user_id, User)
     user.active = not user.active
@@ -45,7 +54,10 @@ async def activation_view(request: Request, user_id: int):
 
 
 @blue.patch('/<user_id:int>')
-async def update_view(request: Request, user_id: int):
+@inject_user()
+@protected()
+@admin_only
+async def update_view(request: Request, user_id: int, **_):
     """Изменить пользователя."""
     user = await get_exists_object(user_id, User)
     update_data = await validation(request, UpdateSchema)

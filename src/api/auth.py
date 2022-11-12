@@ -7,6 +7,7 @@ from src.db.crud import create, update_object
 from src.db.models import User
 from src.schemas.users import CreateSchema, ResponseSchema, UpdateSchema
 from src.schemas.validators import validation
+from src.core.exceptions import BadRequestException
 
 blue = Blueprint('login', url_prefix='/login')
 
@@ -30,16 +31,6 @@ async def retrieve_user(request: Request, payload: dict):
         return user
     else:
         return None
-
-
-def authenticated(wrapped):
-    def decorator(f):
-        @wraps(f)
-        async def decorated_function(request: Request, *args, **kwargs):
-            print('\n'*3, request.headers.get('Authorization', 111), '\n'*5)
-            return await f(request, *args, **kwargs)
-        return decorated_function
-    return decorator(wrapped)
 
 
 @blue.get('/<token:str>')
