@@ -10,6 +10,12 @@ class UserNameSchema(BaseModel):
         max_length=10
     )
 
+class PasswordSchema(BaseModel):
+    password: str = Field(
+        description='Пароль пользователя',
+        min_length=8
+    )
+
 
 class ResponseSchema(UserIdSchema, UserNameSchema):
     active: bool
@@ -19,10 +25,8 @@ class ResponseSchema(UserIdSchema, UserNameSchema):
         orm_mode = True
 
 
-class CreateSchema(UserNameSchema):
-    password: str = Field(
-        min_length=8
-    )
+class CreateSchema(UserNameSchema, PasswordSchema):
+    ...
 
 
 class UpdateSchema(UserNameSchema):

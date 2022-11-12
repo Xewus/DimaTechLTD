@@ -25,7 +25,7 @@ class UpdateSchema(BaseModel):
     )
 
 
-class CreateSchema(UserIdSchema, UpdateSchema):
+class CreateSchema(UpdateSchema):
     bill_id: PositiveInt | None = Field(
         description='`id` счёта',
         default=None

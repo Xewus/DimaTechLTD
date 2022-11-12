@@ -1,5 +1,6 @@
-from sanic import Blueprint, Request, json
 from functools import wraps
+
+from sanic import Blueprint, Request, json
 
 from src.core.exceptions import BadRequestException
 from src.core.views import json_response
@@ -7,9 +8,9 @@ from src.db.crud import create, update_object
 from src.db.models import User
 from src.schemas.users import CreateSchema, ResponseSchema, UpdateSchema
 from src.schemas.validators import validation
-from src.core.exceptions import BadRequestException
 
 blue = Blueprint('login', url_prefix='/login')
+
 
 async def authenticate(request: Request) -> User:
     if request.json is None:
@@ -23,6 +24,7 @@ async def authenticate(request: Request) -> User:
         raise BadRequestException('Auth')
 
     return user
+
 
 async def retrieve_user(request: Request, payload: dict):
     if payload:

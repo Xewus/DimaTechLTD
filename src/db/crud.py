@@ -32,6 +32,7 @@ async def make_deal(product: Product, bill: Bill, buy: dict) -> None:
     bill.balance -= payment
     product.amount -= buy['amount']
     transaction = Transaction(
+        signature=make_signature(buy),
         amount=payment,
         bill_id=bill.bill_id,
         user_id=bill.user_id

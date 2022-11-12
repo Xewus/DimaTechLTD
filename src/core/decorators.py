@@ -1,7 +1,10 @@
-from sanic import Request
-from src.core.exceptions import ForbiddenException
 from functools import wraps
+
+from sanic import Request
+
+from src.core.exceptions import ForbiddenException
 from src.db.models import User
+
 
 def admin_only(wrapped):
     def decorator(f):
@@ -12,6 +15,7 @@ def admin_only(wrapped):
             return await f(request, *args, **kwargs)
         return decorated_function
     return decorator(wrapped)
+
 
 def admin_or_owner_only(wrapped):
     def decorator(f):

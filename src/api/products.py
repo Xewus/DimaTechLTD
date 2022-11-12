@@ -1,10 +1,13 @@
 """Эндпоинты для товаров.
 """
 from sanic import Blueprint, Request, json
+from sanic_jwt.decorators import inject_user, protected
 
+from src.core.decorators import admin_only
+from src.core.exceptions import BadRequestException
 from src.core.views import json_response
 from src.db.crud import create, make_deal, update_object
-from src.db.models import Bill, Product
+from src.db.models import Bill, Product, User
 from src.schemas.products import (BuySchema, CreateSchema, ResponseSchema,
                                   UpdateSchema)
 from src.schemas.validators import get_exists_object, validation
@@ -13,11 +16,16 @@ blue = Blueprint('poducts', url_prefix='/products')
 
 
 @blue.patch('/buy')
-async def buy_view(request: Request):
+@inject_user()
+@protected()
+async def buy_view(request: Request, user: User):
     """Купить товар. Можно реализовать покупку разных товаров."""
     buy = await validation(request, BuySchema)
     product: Product = await get_exists_object(buy['product_id'], Product)
     bill: Bill = await get_exists_object(buy['bill_id'], Bill)
+    if bill.user_id != user.user_id != bill.user:
+        raise BadRequestException(f'Not bill owner')
+
     await make_deal(product, bill, buy)
     product.amount = buy['amount']
     return await json_response(ResponseSchema, product)
@@ -38,6 +46,9 @@ async def get_one_view(request: Request, product_id: int):
 
 
 @blue.post('/')
+@inject_user()
+@protected()
+@admin_only
 async def create_view(request: Request):
     """Добавить новый товар."""
     product = await validation(request, CreateSchema)
@@ -46,6 +57,9 @@ async def create_view(request: Request):
 
 
 @blue.patch('/<product_id:int>')
+@inject_user()
+@protected()
+@admin_only
 async def update_view(
     request: Request, product_id: int, update_data: UpdateSchema
 ):
@@ -57,6 +71,9 @@ async def update_view(
 
 
 @blue.delete('/<product_id:int>')
+@inject_user()
+@protected()
+@admin_only
 async def delete_view(request: Request, product_id: int):
     """Удалить товар."""
     product = await get_exists_object(product_id, Product)
