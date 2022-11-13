@@ -14,7 +14,6 @@ class AppSettings(EnvSettings):
     DEBUG: bool
     HOST: str
     PORT: int
-    WORKERS: int
     APP_NAME: str
     APP_KEY: str
     SANIC_JWT_ACCESS_TOKEN_NAME: str
