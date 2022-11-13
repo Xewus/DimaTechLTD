@@ -1,3 +1,5 @@
+"""Декораторы для обслуживания приложения.
+"""
 from functools import wraps
 
 from sanic import Request
@@ -7,6 +9,8 @@ from src.db.models import User
 
 
 def admin_only(wrapped):
+    """Разрешить доступ только админам.
+    """
     def decorator(f):
         @wraps(f)
         async def decorated_function(
@@ -20,6 +24,8 @@ def admin_only(wrapped):
 
 
 def admin_or_owner_only(wrapped):
+    """Разрешить доступ только админам или пользователям с указанным `ID`.
+    """
     def decorator(f):
         @wraps(f)
         async def decorated_function(

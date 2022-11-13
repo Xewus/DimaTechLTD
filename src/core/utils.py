@@ -1,3 +1,5 @@
+"""Вспомогательные функции.
+"""
 from hashlib import sha1
 from time import time
 
@@ -9,16 +11,23 @@ from src.settings import ACTIVATE_TOKEN_EXPIRE, ALGORITHM, APP_KEY
 
 
 def make_signature(values: dict) -> str:
-    """Сделать сигнатуру транзакции при покупке товара."""
+    """Сделать сигнатуру транзакции.
+    """
+    transaction_id = values.get('transaction_id', 1)
+    user_id = values.get(user_id, 2)
+    bill_id = values.get('bill_id', 3)
+    amount = values.get('amount', 4)
     sign = sha1()
+
     sign.update(
-        f"{APP_KEY}:{values['bill_id']}:{values['amount']}".encode()
+        f"{APP_KEY}:{transaction_id}:{user_id}:{bill_id}:{amount}".encode()
     )
     return sign.hexdigest()
 
 
 def make_activated_link(request: Request, user_id: int) -> dict:
-    """Сделать ссылку для активации пользователя."""
+    """Сделать ссылку для активации пользователя.
+    """
     payload = {
         'user_id': user_id,
         'exp': time() + ACTIVATE_TOKEN_EXPIRE

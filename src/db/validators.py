@@ -1,3 +1,5 @@
+"""Валидаторы для моделей БД.
+"""
 from tortoise.exceptions import ValidationError
 from tortoise.validators import Validator
 

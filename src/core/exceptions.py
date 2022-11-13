@@ -1,9 +1,13 @@
+"""Обработчики ошибок.
+"""
 from http import HTTPStatus
 
 from sanic.exceptions import SanicException
 
 
 class BadRequestException(SanicException):
+    """Базовый обработчик ошибок.
+    """
     def __init__(
         self,
         message: str | bytes | None = None,
@@ -13,6 +17,8 @@ class BadRequestException(SanicException):
 
 
 class ForbiddenException(BadRequestException):
+    """Доступ к ресурсу запрещён.
+    """
     def __init__(
         self,
         message: str | bytes = 'Forbidden',

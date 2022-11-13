@@ -11,7 +11,7 @@ class UserNameSchema(BaseModel):
     )
 
 
-class PasswordSchema(BaseModel):
+class PasswordSchema(BaseModel)):
     password: str = Field(
         description='Пароль пользователя',
         min_length=8
