@@ -5,7 +5,7 @@ from sanic_jwt.decorators import inject_user, protected
 
 from src.core.decorators import admin_only, admin_or_owner_only
 from src.core.responses import json_pydantic
-from src.db.crud import create, update_object, get_exists_object
+from src.db.crud import create, get_exists_object, update_object
 from src.db.models import User
 from src.schemas.users import (CreateSchema, PasswordSchema, ResponseSchema,
                                UpdateSchema)

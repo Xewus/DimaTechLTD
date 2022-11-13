@@ -6,7 +6,7 @@ from sanic_jwt.decorators import inject_user, protected
 from src.core.decorators import admin_only
 from src.core.exceptions import BadRequestException
 from src.core.responses import json_pydantic
-from src.db.crud import create, make_deal, update_object, get_exists_object
+from src.db.crud import create, get_exists_object, make_deal, update_object
 from src.db.models import Bill, Product, User
 from src.schemas.products import (BuySchema, CreateSchema, ResponseSchema,
                                   UpdateSchema)

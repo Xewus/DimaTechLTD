@@ -7,7 +7,7 @@ from tortoise.exceptions import DoesNotExist
 
 from src.core.exceptions import BadRequestException
 from src.core.utils import make_activated_link
-from src.db.crud import create, update_object, get_exists_object
+from src.db.crud import create, get_exists_object, update_object
 from src.db.models import User
 from src.schemas.auth import CreateSchema, JWTSchema
 from src.schemas.validators import validation

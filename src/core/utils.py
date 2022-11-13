@@ -14,7 +14,7 @@ def make_signature(values: dict) -> str:
     """Сделать сигнатуру транзакции.
     """
     transaction_id = values.get('transaction_id', 1)
-    user_id = values.get(user_id, 2)
+    user_id = values.get('user_id', 2)
     bill_id = values.get('bill_id', 3)
     amount = values.get('amount', 4)
     sign = sha1()
