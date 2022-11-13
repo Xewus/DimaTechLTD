@@ -41,14 +41,21 @@ async def get_one_view(request: Request, user: User, bill_id: int):
 @blue.get('/user/<user_id:int>')
 @inject_user()
 @protected()
-@admin_or_owner_only
-async def get_my_view(request: Request, user: User, user_id: int):
+@admin_only
+async def get_my_view(request: Request, user_id: int):
     """Показать счета пользователя c указанным `ID`.
     """
-    if user.admin and user.pk != user_id:
-        await get_exists_object(user_id, User)
-
     bills = await Bill.filter(user_id=user_id)
+    return await json_pydantic(ResponseSchema, bills, many=True)
+
+
+@blue.get('/my')
+@inject_user()
+@protected()
+async def get_my_view(request: Request, user: User):
+    """Показать пользователю его счета.
+    """
+    bills = await Bill.filter(user_id=user.pk)
     return await json_pydantic(ResponseSchema, bills, many=True)
 
 

@@ -3,7 +3,7 @@ from time import time
 from pydantic import BaseModel, Field, HttpUrl, validator
 
 from src.core.exceptions import BadRequestException
-from src.settings import ACTIVATE_TOKEN_EXPIRE
+from src.settings import AppSettings
 
 from .generics import UserIdSchema
 from .users import CreateSchema
@@ -45,6 +45,6 @@ class JWTSchema(UserIdSchema):
     def validate(cls, exp: float) -> float:
         """Проверить, что время не превышает допустимое.
         """
-        if exp > time() + ACTIVATE_TOKEN_EXPIRE:
+        if exp > time() + AppSettings.ACTIVATE_TOKEN_EXPIRE:
             raise BadRequestException
         return exp

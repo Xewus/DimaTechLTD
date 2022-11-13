@@ -155,8 +155,8 @@ async def create_first_user() -> None:
         print(user)
         return None
     try:
-        from src.settings import FIRST_USER
-        user = await User.create(**FIRST_USER)
+        from src.settings import FirstUser
+        user = await User.create(**FirstUser.dict())
         await user.save()
     except ImportError:
         print('В настройках нет данных для первого пользователя')

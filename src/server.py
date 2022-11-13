@@ -13,8 +13,7 @@ from src.api.products import blue as blue_products
 from src.api.transactions import blue as blue_transactions
 from src.api.users import blue as blue_users
 from src.db.models import create_first_user
-from src.settings import (ACCESS_TOKEN_EXPIRE, ALGORITHM, APP_KEY, APP_NAME,
-                          TORTOISE_CONFIG)
+from src.settings import AppSettings, TortoiseSettings
 
 fmt = logging.Formatter(
     fmt="%(asctime)s - %(message)s",
@@ -30,8 +29,8 @@ logger_db_client.setLevel(logging.DEBUG)
 logger_db_client.addHandler(sh)
 
 
-app = Sanic(name=APP_NAME)
-app.config.SANIC_JWT_ACCESS_TOKEN_NAME = 'access_token'
+app = Sanic(name=AppSettings.APP_NAME)
+app.config.update(AppSettings.dict())
 
 app.blueprint(blueprint=blue_auth)
 app.blueprint(blueprint=blue_users)
@@ -42,14 +41,14 @@ app.blueprint(blueprint=blue_transactions)
 
 register_tortoise(
     app,
-    **TORTOISE_CONFIG
+    **TortoiseSettings.dict()
 )
 
 Initialize(
     app,
-    secret=APP_KEY,
-    algorithm=ALGORITHM,
-    expiration_delta=ACCESS_TOKEN_EXPIRE,
+    secret=AppSettings.APP_KEY,
+    algorithm=AppSettings.ALGORITHM,
+    expiration_delta=AppSettings.ACCESS_TOKEN_EXPIRE,
     authenticate=authenticate,
     retrieve_user=retrieve_user
 )

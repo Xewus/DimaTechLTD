@@ -1,9 +1,9 @@
-from src.settings import DEBUG
+from src.settings import AppSettings
 import os
 
 def main():
-    command = 'sanic src.api.server:app'
-    if DEBUG:
+    command = 'sanic src.server:app'
+    if AppSettings.DEBUG:
         command += ' --debug --reload'
     os.system(command=command)
 

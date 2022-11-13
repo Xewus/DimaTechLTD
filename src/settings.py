@@ -1,60 +1,65 @@
+from decouple import config
+from pydantic import BaseSettings, PostgresDsn, SecretStr
 from pathlib import Path
 
-from decouple import config
-from sanic.config import Config
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-DEBUG = config('DEBUG', default=False, cast=bool)
+class EnvSettings(BaseSettings):
 
-BASE_DIR = Path(__file__).resolve().resolve
-
-APP_NAME = config('APP_NAME', default='Application')
-APP_KEY = config('APP_KEY', default='appkey')
+    class Config:
+        env_file = BASE_DIR / 'env'
 
 
-class AppConfig(Config):
-    DEBUG = True
-    # RELOAD_START = DEBUG
-    HOST = config('HOST', default='127.0.0.1')
-    PORT = config('PORT', default=8000, cast=int)
-    WORKERS = config('WORKERS', default=2, cast=int)
+class AppSettings(EnvSettings):
+    DEBUG: bool
+    HOST: str
+    PORT: int
+    WORKERS: int
+    APP_NAME: str
+    APP_KEY: str
+    SANIC_JWT_ACCESS_TOKEN_NAME: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE: int = 60 * 60 * 24
+    ACTIVATE_TOKEN_EXPIRE: int = 60 * 15
+
+    class Config:
+        env_file = '.env'
 
 
-DB_URL = 'postgresql://postgres:postgres@localhost/postgres'
+class TortoiseSettings(EnvSettings):
+    db_url: PostgresDsn = config('DB_URL')
+    modules: dict[str, list[str]] = {'models': ['src.db.models']}
+    generate_schemas: bool = True
 
-SECRET_KEY = config('SECRET_KEY', default='secretkey')
-ALGORITHM = 'HS256'
-ACCESS_TOKEN_EXPIRE = 60 * 60 * 12
-ACTIVATE_TOKEN_EXPIRE = 60 * 15
+
+class FirstUser(EnvSettings):
+    username: SecretStr
+    password: SecretStr = config('PASSWORD')
+    active: bool = True
+    admin: bool = True
+
+
+AppSettings = AppSettings()
+TortoiseSettings = TortoiseSettings()
+FirstUser = FirstUser()
+
 
 MAX_LEN_USERNAME = 10
 MIN_LEN_PASSWORD = 8
 
-# ################################ database ################################ #
-
-FIRST_USER = {
-    'username': config('USERNAME', default='User').capitalize(),
-    'email': config('EMAIL', default='q@q.qq'),
-    'password': config('FIRST_USER_PASSWORD', default='12345678'),
-    'active': True,
-    'admin': True
-}
-
-TORTOISE_CONFIG = {
-    'db_url': config('DB_URL', default='sqlite://./db.sqlite'),
-    'modules': {'models': ['src.db.models']},
-    'generate_schemas': True
-}
 
 TORTOISE_ORM = {
-    "connections": {
-        "default": TORTOISE_CONFIG['db_url'],
+    'connections': {
+        'default': TortoiseSettings.db_url,
     },
-    "apps": {
-        "models": {
-            "models": ['src.db.models'], "default_connection": "default"
+    'apps': {
+        'models': {
+            'models': ['src.db.models'],
+            'default_connection': 'default'
         },
     },
 }
+
 
 # ################################# author ################################# #
 

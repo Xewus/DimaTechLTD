@@ -11,7 +11,7 @@ from src.db.crud import create, get_exists_object, update_object
 from src.db.models import User
 from src.schemas.auth import CreateSchema, JWTSchema
 from src.schemas.validators import validation
-from src.settings import ALGORITHM, APP_KEY
+from src.settings import AppSettings
 
 blue = Blueprint('login', url_prefix='/login')
 
@@ -56,7 +56,9 @@ async def activation(request: Request, user_id: int, token: str):
     try:
         payload = JWTSchema(
             **decode(
-                jwt=token, key=APP_KEY, algorithms=[ALGORITHM]
+                jwt=token,
+                key=AppSettings.APP_KEY,
+                algorithms=[AppSettings.ALGORITHM]
             )
         )
         if user_id != payload.user_id:

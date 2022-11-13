@@ -7,12 +7,13 @@ from jwt.api_jwt import encode
 from sanic import Request
 
 from src.schemas.auth import UrlSchema
-from src.settings import ACTIVATE_TOKEN_EXPIRE, ALGORITHM, APP_KEY
+from src.settings import AppSettings
 
 
 def make_signature(values: dict) -> str:
     """Сделать сигнатуру транзакции.
     """
+    app_key = AppSettings.APP_KEY
     transaction_id = values.get('transaction_id', 1)
     user_id = values.get('user_id', 2)
     bill_id = values.get('bill_id', 3)
@@ -20,7 +21,7 @@ def make_signature(values: dict) -> str:
     sign = sha1()
 
     sign.update(
-        f"{APP_KEY}:{transaction_id}:{user_id}:{bill_id}:{amount}".encode()
+        f"{app_key}:{transaction_id}:{user_id}:{bill_id}:{amount}".encode()
     )
     return sign.hexdigest()
 
@@ -30,11 +31,15 @@ def make_activated_link(request: Request, user_id: int) -> dict:
     """
     payload = {
         'user_id': user_id,
-        'exp': time() + ACTIVATE_TOKEN_EXPIRE
+        'exp': time() + AppSettings.ACCESS_TOKEN_EXPIRE
     }
     link = request.url_for(
         view_name='login.activation',
         user_id=user_id,
-        token=encode(payload=payload, key=APP_KEY, algorithm=ALGORITHM)
+        token=encode(
+            payload=payload,
+            key=AppSettings.APP_KEY,
+            algorithm=AppSettings.ALGORITHM
+        )
     )
     return UrlSchema(url=link).dict()

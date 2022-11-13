@@ -20,6 +20,13 @@ blue = Blueprint('poducts', url_prefix='/products')
 @protected()
 async def buy_view(request: Request, user: User):
     """Купить товар. Можно реализовать покупку разных товаров.
+
+    #### Example:
+    '{
+        "bill_id":123456,
+        "product_id":3,
+        "amount":2
+    }'
     """
     buy = await validation(request, BuySchema)
     product: Product = await get_exists_object(buy['product_id'], Product)
@@ -56,6 +63,14 @@ async def get_one_view(request: Request, product_id: int):
 @admin_only
 async def create_view(request: Request):
     """Добавить новый товар.
+
+    #### Example:
+    '{
+        "name":"Phone",
+        "description":"Really cool phone",
+        "price":599.99,
+        "amount":500
+    }'
     """
     product = await validation(request, CreateSchema)
     product = await create(product, Product)

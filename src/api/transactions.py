@@ -11,8 +11,7 @@ from src.db.crud import create_transaction, get_exists_object
 from src.db.models import Bill, Transaction, User
 from src.schemas.transactions import CreateSchema, ResponseSchema
 from src.schemas.validators import validation
-from src.settings import DEBUG
-
+from src.settings import AppSettings
 blue = Blueprint('payments', url_prefix='/payment')
 
 
@@ -72,6 +71,17 @@ async def get_bill_transactions(request: Request, user: User, bill_id: int):
 
 @blue.post('/webhook')
 async def replenish_bill(request: Request):
+    """Принять и обработать транзакцию.
+
+    #### Example:
+    '{
+        "signature":"70e224ace9d3859aca84ffb88edf593acec92dbb",
+        "transaction_id":1234567,
+        "user_id":1,
+        "bill_id":123456,
+        "amount":100
+    }'
+    """
     transaction = await validation(request, CreateSchema)
     await get_exists_object(transaction['user_id'], User)
     transaction = await create_transaction(transaction)
@@ -82,7 +92,7 @@ async def replenish_bill(request: Request):
 async def delete_view(request: Request, transaction_id: int):
     """Удалить транзакцию c указанным `ID`.
     """
-    if not DEBUG:
+    if not AppSettings.DEBUG:
         raise ForbiddenException
 
     transaction = await get_exists_object(transaction_id, Transaction)
