@@ -5,7 +5,7 @@ from functools import wraps
 from sanic import Request
 
 from src.core.exceptions import ForbiddenException
-from src.db.models import User
+from src.db.models import MyUser as User
 
 
 def admin_only(wrapped):

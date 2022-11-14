@@ -11,8 +11,9 @@
 from __future__ import annotations
 
 from passlib.context import CryptContext
-from tortoise import fields
+from tortoise import fields, connections
 from tortoise.models import Model
+from tortoise.exceptions import IntegrityError
 
 from src.db.validators import PositiveNumberlValidator
 from src.settings import MAX_LEN_USERNAME
@@ -20,7 +21,7 @@ from src.settings import MAX_LEN_USERNAME
 pass_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 
-class User(Model):
+class MyUser(Model):
     user_id = fields.BigIntField(pk=True)
     username = fields.CharField(
         max_length=MAX_LEN_USERNAME,
@@ -110,7 +111,7 @@ class Bill(Model):
         description='Баланс пользователя'
     )
     user = fields.ForeignKeyField(
-        model_name='models.User',
+        model_name='models.MyUser',
         related_name='bills',
         on_delete=fields.RESTRICT,
         description='Владелец счёта. Удаление владельца запрещено.'
@@ -140,7 +141,7 @@ class Transaction(Model):
         description='С каким счёта была проведена тразакция'
     )
     user = fields.ForeignKeyField(
-        model_name='models.User',
+        model_name='models.MyUser',
         related_name='transactions',
         on_delete=fields.RESTRICT,
         description='Владелец счёта. Удаление владельца запрещено.'
@@ -150,14 +151,21 @@ class Transaction(Model):
 async def create_first_user() -> None:
     """Создаёт первого пользователя-админа, если БД пуста.
     """
-    user = await User.first()
+    user = await MyUser.first()
     if user:
-        print(user)
+        print('\nExists user:', user, '\n')
         return None
     try:
         from src.settings import FirstUser
-        user = await User.create(**FirstUser.dict())
+        conn = connections.get('default')
+        await conn.execute_query('ALTER SEQUENCE myuser_user_id_seq RESTART;')
+        user = await MyUser.create(**FirstUser.dict())
         await user.save()
+        print('\nFirst user created', await MyUser.first(), '\n')
+        return None
     except ImportError:
         print('В настройках нет данных для первого пользователя')
+        return None
+    except IntegrityError:
+        print('\nПользователь уже есть: ', await MyUser.first(), '\n')
         return None

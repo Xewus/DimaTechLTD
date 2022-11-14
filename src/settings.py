@@ -1,5 +1,5 @@
 from decouple import config
-from pydantic import BaseSettings, PostgresDsn, SecretStr
+from pydantic import BaseSettings, PostgresDsn, Field
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,12 +28,12 @@ class AppSettings(EnvSettings):
 class TortoiseSettings(EnvSettings):
     db_url: PostgresDsn = config('DB_URL')
     modules: dict[str, list[str]] = {'models': ['src.db.models']}
-    generate_schemas: bool = True
+    # generate_schemas: bool = True
 
 
 class FirstUser(EnvSettings):
-    username: SecretStr
-    password: SecretStr = config('PASSWORD')
+    username: str
+    password: str = config('PASSWORD')
     active: bool = True
     admin: bool = True
 

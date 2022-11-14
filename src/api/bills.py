@@ -7,7 +7,7 @@ from src.core.decorators import admin_only, admin_or_owner_only
 from src.core.exceptions import ForbiddenException
 from src.core.responses import json_pydantic
 from src.db.crud import create, get_exists_object
-from src.db.models import Bill, User
+from src.db.models import Bill, MyUser as User
 from src.schemas.bills import ResponseSchema
 
 blue = Blueprint('bills', url_prefix='/bills')
