@@ -4,8 +4,8 @@ import os
 def main():
     command = 'sanic src.server:app --fast'
     if AppSettings.DEBUG:
-
         command += ' --debug --reload'
+    
     os.system(command=command)
 
 
