@@ -29,7 +29,7 @@ class PasswordSchema(BaseModel):
 
 
 class ResponseSchema(UserIdSchema, UserNameSchema):
-    """Схема данных для создания пользователя.
+    """Схема данных для ответа.
 
     #### Fields:
     - user_id (PositivInt): Идентификатор пользователя.
