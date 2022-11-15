@@ -1,6 +1,7 @@
-from decouple import config
-from pydantic import BaseSettings, PostgresDsn, Field
 from pathlib import Path
+
+from decouple import config
+from pydantic import BaseSettings, PostgresDsn
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,14 +22,11 @@ class AppSettings(EnvSettings):
     ACCESS_TOKEN_EXPIRE: int = 60 * 60 * 24
     ACTIVATE_TOKEN_EXPIRE: int = 60 * 15
 
+    DB_URL: PostgresDsn = config('DB_URL')
+    DB_MODULES: dict[str, list[str]] = {'models': ['src.db.models']}
+
     class Config:
         env_file = '.env'
-
-
-class TortoiseSettings(EnvSettings):
-    db_url: PostgresDsn = config('DB_URL')
-    modules: dict[str, list[str]] = {'models': ['src.db.models']}
-    # generate_schemas: bool = True
 
 
 class FirstUser(EnvSettings):
@@ -38,9 +36,8 @@ class FirstUser(EnvSettings):
     admin: bool = True
 
 
-AppSettings = AppSettings()
-TortoiseSettings = TortoiseSettings()
-FirstUser = FirstUser()
+AppSettings: BaseSettings = AppSettings()
+FirstUser: BaseSettings = FirstUser()
 
 
 MAX_LEN_USERNAME = 10
@@ -49,7 +46,7 @@ MIN_LEN_PASSWORD = 8
 
 TORTOISE_ORM = {
     'connections': {
-        'default': TortoiseSettings.db_url,
+        'default': AppSettings.DB_URL,
     },
     'apps': {
         'models': {

@@ -11,9 +11,10 @@
 from __future__ import annotations
 
 from passlib.context import CryptContext
-from tortoise import fields, connections
-from tortoise.models import Model
+from tortoise import connections, fields
 from tortoise.exceptions import IntegrityError
+from tortoise.models import Model
+from pydantic import BaseSettings
 
 from src.db.validators import PositiveNumberlValidator
 from src.settings import MAX_LEN_USERNAME
@@ -148,7 +149,7 @@ class Transaction(Model):
     )
 
 
-async def create_first_user() -> None:
+async def create_first_user(first_user: BaseSettings) -> None:
     """Создаёт первого пользователя-админа, если БД пуста.
     """
     user = await MyUser.first()
@@ -156,10 +157,9 @@ async def create_first_user() -> None:
         print('\nExists user:', user, '\n')
         return None
     try:
-        from src.settings import FirstUser
         conn = connections.get('default')
-        await conn.execute_query('ALTER SEQUENCE myuser_user_id_seq RESTART;')
-        user = await MyUser.create(**FirstUser.dict())
+        # await conn.execute_query('ALTER SEQUENCE myuser_user_id_seq RESTART;')
+        user = await MyUser.create(**first_user.dict())
         await user.save()
         print('\nFirst user created', await MyUser.first(), '\n')
         return None

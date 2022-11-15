@@ -1,5 +1,6 @@
 from src.settings import AppSettings
 import os
+from src.server import create_app
 
 def main():
     command = 'sanic src.server:app --fast'
@@ -10,4 +11,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    app = create_app()
+    app.run()

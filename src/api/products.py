@@ -7,7 +7,9 @@ from src.core.decorators import admin_only
 from src.core.exceptions import BadRequestException
 from src.core.responses import json_pydantic
 from src.db.crud import create, get_exists_object, make_deal, update_object
-from src.db.models import Bill, Product, MyUser as User
+from src.db.models import Bill
+from src.db.models import MyUser as User
+from src.db.models import Product
 from src.schemas.products import (BuySchema, CreateSchema, ResponseSchema,
                                   UpdateSchema)
 from src.schemas.validators import validation

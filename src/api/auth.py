@@ -12,8 +12,9 @@ from src.db.models import MyUser as User
 from src.schemas.auth import CreateSchema, JWTSchema
 from src.schemas.validators import validation
 from src.settings import AppSettings
+from src.core.enums import AuthUrls
 
-blue = Blueprint('login', url_prefix='/login')
+blue = Blueprint('login', url_prefix=AuthUrls.LOGIN)
 
 
 async def authenticate(request: Request) -> User:
@@ -87,6 +88,8 @@ async def create_user(request: Request):
     """Создать пользователя с юзернеймом и паролем, переданными в `JSON`.
     Вернуть пользователю временную ссылку для активации.
     """
+    if not request.json:
+        raise BadRequestException
     user = await validation(request, CreateSchema)
     user: User = await create(user, User)
     link = make_activated_link(request, user.pk)
